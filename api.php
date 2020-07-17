@@ -2,8 +2,8 @@
 
 class Controller
 {
-    const APPID = "wx552593a8e7c4b0de";
-    const SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+    const APPID = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";// Your Appid
+    const SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";// Your Secret
 
     /**
      * 微信授权回调，原来是作为redirect_url使用的，现在修改下返回值即可满足新需求
@@ -32,14 +32,22 @@ class Controller
      */
     public function wxAuthUrl(array $request)
     {
-        $callback = urlencode($request['callback']);
+        // substr url query
+        $callback = @$request['callback'];
+        $hasQuery = stripos($callback, '?');
+        $callback = urlencode(false === $hasQuery ? $callback : substr($callback, 0, $hasQuery));
+        
+        // auth method
         $state = @$request['type'];
         if (1 == $state) {
             $scope = "snsapi_userinfo";
         } else {
             $scope = "snsapi_base";
         }
+        
+        // format url
         $url = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=".self::APPID."&redirect_uri={$callback}&response_type=code&scope={$scope}&state={$state}#wechat_redirect";
+       
         return $this->response(0, 'success', $url);
     }
 
